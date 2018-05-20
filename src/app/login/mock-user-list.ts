@@ -1,9 +1,14 @@
 export const usersList=[
-  {username:'admin',password:'admin'},
-  {username:'user',password:'user'}
+  {username:'Admin',password:'admin'},
+  {username:'User',password:'user'}
 ];
 
 export class userModel{
   username:string;
   password:string;
 }
+
+
+export const imagesList=[
+  { url: '1.jpg',title: '', price: 12,category: 'Starter'}
+]

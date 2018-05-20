@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {userModel} from "./mock-user-list";
-import {Router} from "@angular/router";
+import {Router, NavigationExtras} from "@angular/router";
+import {LoginService} from "./login.service";
 
 @Component({
   selector: 'login',
@@ -13,13 +14,18 @@ export class LoginComponent implements OnInit {
     password:''
   };
 
-  constructor(private router: Router) { }
+  constructor(private router: Router,private loginService:LoginService) { }
 
   ngOnInit() {
   }
   login(user){
-    // console.log('*** User',user);
-    this.router.navigate(['/dashboard']);
+    if(user && user.username ==='Admin' && user.password ==='admin' ){
+      this.loginService.userRole ='admin';
+
+    } else {
+      this.loginService.userRole = 'user';
+    }
+    this.router.navigate(["dashboard"]);
   }
 
 }

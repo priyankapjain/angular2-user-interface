@@ -9,7 +9,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import {DashboardModule} from "./dashboard/dashboard.module";
 import {FormsModule} from "@angular/forms";
 import {routing} from "./app.routes";
-
+import {AppService} from "./app.service";
+import {FullCalendarModule} from "ng-fullcalendar";
 
 @NgModule({
   declarations: [
@@ -20,9 +21,10 @@ import {routing} from "./app.routes";
     BrowserModule,
     LoginModule,
     DashboardModule,
-    FormsModule
+    FormsModule,
+    FullCalendarModule
   ],
-  providers: [],
+  providers: [AppService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

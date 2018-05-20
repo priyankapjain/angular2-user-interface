@@ -1,4 +1,124 @@
-<p>
-  dashboard works!
-</p>
-<h1>Dashboard works</h1>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <!--<a class="navbar-brand" href="#">WebSiteName</a>-->
+    </div>
+    <ul class="nav navbar-nav navbar-right">
+      <!--<button (click)="calendarSelect()">Select Items</button>-->
+      <li class="active" (click)="logout()"><span class="glyphicon glyphicon-user"></span> Logout</li>
+      <li class="active" (click)="showListItems()"><span class="glyphicon glyphicon-user"></span> Show Item list</li>
+      <li class="active" (click)="calendarSelect()"><span class="glyphicon glyphicon-calendar"></span> Choose Item List</li>
+    </ul>
+  </div>
+</nav>
+
+
+<div *ngIf="loginService.userRole==='admin'" class="admin_section col-lg-12">
+
+  <div class="panel panel-primary col-lg-6 admin_section_form">
+    <div class="panel-heading">Add Items <h3>{{status}}</h3></div>
+    <div class="panel-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="row">
+
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" class="form-control" id="name" placeholder="name" formControlName="name">
+            </div>
+            <div class="form-group">
+              <label for="price">Price</label>
+              <input type="number" class="form-control" id="price" placeholder="price" formControlName="price">
+            </div>
+            <div class="form-group">
+              <label for="name">Type</label>
+              <select formControlName="category" class="form-control">
+                <!--<option [ngValue]="null">Select Category</option>-->
+                <option *ngFor="let option of itemTypes"
+                        [ngValue]="option.type">{{option.type}}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="avatar">Avatar</label>
+              <input type="file" id="avatar" (change)="readUrl($event)" #fileInput>
+              <button type="button" class="btn btn-sm btn-default" (click)="clearFile()">clear file</button>
+
+              <img [src]="imgUrl" *ngIf="imgUrl" height="50" width='50'>
+            </div>
+          </div>
+          {{form.value|json}}
+          {{form.valid}}
+          <button type="submit" [disabled]="form.invalid" class="btn btn-success">Submit <i
+            class="fa fa-spinner fa-spin fa-fw" *ngIf="loading"></i></button>
+
+        </div>
+      </form>
+    </div>
+    <!--<div class="panel-footer">Panel Footer</div>-->
+  </div>
+</div>
+
+
+<div class="row" *ngIf="appService.images.length>0;else noImages">
+  <div class="col-lg-6" *ngIf="(showCollenderInterface &&  showStarter) || (showItemsOnly)">
+    <h3> Starters</h3>
+    <div class="img_list_items">
+      <div class="panel panel-default">
+        <div class="panel-heading"> Images List - Starter</div>
+        <div class="panel-body">
+          <div *ngFor="let img of appService.images;let i = index" class="img_list">
+            <img [src]="img.url" height="100" width='250' *ngIf="(img.category==='Starter');else no_starter ">
+            <h3 class="img_footer" *ngIf="img.category==='Starter'">
+              {{img.title}}
+              <label>Price: {{img.price}}</label>
+              <span class="glyphicon glyphicon-trash" (click)="deleteImg(img.url)"></span>
+              <input class="form-control" type="checkbox"  (change)="itemSelected(img)" />
+            </h3>
+            <ng-template #no_starter>
+              Starters not added yet
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="col-lg-6" *ngIf="(showCollenderInterface &&  showMainCourse) || (showItemsOnly)">
+    <h3> Main course</h3>
+    <div class="img_list_items">
+      <div class="panel panel-default">
+        <div class="panel-heading"> Images List - Main Course</div>
+        <div class="panel-body">
+          <div *ngFor="let img of appService.images;let i = index" class="img_list">
+            <img [src]="img.url" height="100" width='250' *ngIf="(img.category==='MainCourse'); else nomain_course ">
+            <h3 class="img_footer" *ngIf="img.category==='MainCourse'">
+              {{img.title}}
+              <label>Price: {{img.price}}</label>
+              <span class="glyphicon glyphicon-trash" (click)="deleteImg(img.url)"></span>
+            </h3>
+            <ng-template #nomain_course>
+              Main Course not added yet
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<ng-template #noImages>
+  Admin not added images yet
+</ng-template>
+
+<!--<p-schedule [events]="events"></p-schedule>-->
+<!--<angular2-fullcalendar [options]="calendarOptions"></angular2-fullcalendar>-->
+
+
+<p>Display event : {{displayEvent | json}}</p>
+<div *ngIf="calendarOptions && showCollenderInterface">
+  <ng-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="eventClick($event.detail)" (eventDrop)="updateEvent($event.detail)"
+                   (eventResize)="updateEvent($event.detail)" (clickButton)="clickButton($event.detail)"></ng-fullcalendar>
+</div>
