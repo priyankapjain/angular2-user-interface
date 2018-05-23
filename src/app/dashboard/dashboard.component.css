@@ -30,3 +30,10 @@ nav li{
   color:red;
   text-align: center;
 }
+.link_item{
+  color:dodgerblue;
+  text-decoration: underline;
+}
+.submit_btn{
+  margin-left: 12px;
+}

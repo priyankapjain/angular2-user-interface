@@ -35,6 +35,8 @@ export class DashboardComponent implements OnInit {
   private startsAvail: boolean = false;
   private mainCourseAvail: boolean = false;
   private adminMsg: string='';
+  private itemsSelected: boolean = false;
+  private selectedItemsToShow: any=[];
 
   constructor(private cdr:ChangeDetectorRef,protected eventService: EventSesrvice, private router: Router, private fb: FormBuilder, private loginService: LoginService, private dashboardService: DashboardService, private appService: AppService) {
     this.createForm();
@@ -51,16 +53,23 @@ export class DashboardComponent implements OnInit {
       {type: 'Starter'},
       {type: 'MainCourse'}
     ];
-    this.setCalendar();
-    for(let i=0;i<4;i+7){
+    this.setCalendar(); // Initlize calendar setup
+    let j=0;  // below code for setting month calculation based on user selected items
+    for(let i=0;i<4;i++){
       this.eventPriceCal.push(
         {
-          startDate:i+1,
+          startDate:j+1,
           price:0,
-          endDate:i+8
+          endDate:j+7
         }
-      )
+      );
+      j=j+7;
     }
+    if(this.loginService.userRole === 'user'){
+      this.showListItems();
+      this.checkMenusAvailability();
+    }
+   // Item list availability check
   }
 
   createForm() {
@@ -73,7 +82,7 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  readUrl(event: any) {
+  readUrl(event: any) { // upload iamges and read items
     if (event.target.files && event.target.files[0]) {
       var reader = new FileReader();
       reader.onload = (event: any) => {
@@ -91,7 +100,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  onSubmit() {
+  onSubmit() { // form submit for image upload
     if (this.form.valid) {
       const formModel = this.form.value;
       this.loading = true;
@@ -130,6 +139,7 @@ export class DashboardComponent implements OnInit {
   clickButton(model: any) {
     this.displayEvent = model;
   }
+ // below code for calendar events handling
 
   eventClick(model: any) {
     this.startsAvail = false;
@@ -178,6 +188,7 @@ export class DashboardComponent implements OnInit {
 
   showListItems() {
     this.showItemsOnly = true;
+    this.showCollenderInterface = false;
   }
   itemSelected(item){
     console.log('Selected Item',item);
@@ -190,7 +201,7 @@ export class DashboardComponent implements OnInit {
        this.calendarOptions = {...this.calendarOptions};
        this.events = this.eventService.myData;
 
-       this.eventPriceCalculation(this.displayEvent,item);
+      this.eventPriceCalculation(this.displayEvent,item);
        this.cdr.detectChanges();
      }
   }
@@ -203,7 +214,11 @@ export class DashboardComponent implements OnInit {
       this.eventService.myData.push({
         id:i,
         title: 'Add starter',
-        start: yearMonth + '-'+i
+        start: yearMonth + '-'+i,
+        validRange: {
+          start: '2018-05-01',
+          end: '2018-05-01'
+        }
       });
       this.eventService.myData.push({
         id:i,
@@ -242,23 +257,26 @@ export class DashboardComponent implements OnInit {
       this.adminMsg ='';
     } else {
       this.adminMsg ='Please add more than 7 images(starters & main course)';
+      if(this.loginService.userRole ==='user'){
+        this.adminMsg ='';
+      }
     }
   }
   }
   eventPriceCalculation(event,item){
-    let obj={
-      startDate:'1',
-      price:null,
-      endDate:'8'
-    }
-    console.log('Event',event);
-    let date = ((event.event.start._i).split('-'))[2]
-    console.log('Item',item);
+    let date = ((event.event.start._i).split('-'))[2];
     for(let j=0;j<4;j++){
       if(date>= this.eventPriceCal[j].startDate && date <= this.eventPriceCal[j].endDate){
-        this.eventPriceCal[j] = this.eventPriceCal[j]+item.price;
+        this.eventPriceCal[j].price = this.eventPriceCal[j].price+item.price;
+        this.itemsSelected = true;
+        this.eventPriceCal[j]['selectedItem']=[];
+        this.eventPriceCal[j]['selectedItem'].push({'item':item,'selectedDate':event.event.start._i});
+        // this.eventPriceCal[j]['selectedDate']=event.event.start._i;
       }
     }
+  }
+  itemToShow(item){
+     this.selectedItemsToShow = item;
   }
 
 }

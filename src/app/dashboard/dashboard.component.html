@@ -49,7 +49,7 @@
               <img [src]="imgUrl" *ngIf="imgUrl" height="50" width='50'>
             </div>
           </div>
-          <button type="submit" [disabled]="form.invalid" class="btn btn-success">Submit <i
+          <button class="submit_btn" type="submit" [disabled]="form.invalid" class="btn btn-success">Submit <i
             class="fa fa-spinner fa-spin fa-fw"></i></button>
 
         </div>
@@ -72,7 +72,7 @@
         <div class="panel-heading"> Images List - Starter</div>
         <div class="panel-body">
           <div *ngFor="let img of appService.images;let i = index"  [ngClass]="{'img_list':(startsAvail) && (img.category==='Starter')}">
-            <img [src]="img.url" height="100" width='250' *ngIf="((startsAvail) && (img.category==='Starter')) || ((showCollenderInterface &&  img.category==='Starter'))">
+            <img [src]="img.url" height="100" width='250' *ngIf="(showItemsOnly && img.category==='Starter') || ((startsAvail) && (img.category==='Starter')) || ((showCollenderInterface &&  img.category==='Starter'))">
             <h3 class="img_footer" *ngIf="img.category==='Starter'">
               {{img.title}}
               <label>Price: {{img.price}}</label>
@@ -95,7 +95,7 @@
         <div class="panel-heading"> Images List - Main Course</div>
         <div class="panel-body">
           <div *ngFor="let img of appService.images;let i = index"  [ngClass]="{'img_list':(startsAvail) && (img.category==='MainCourse')}">
-            <img [src]="img.url" height="100" width='250' *ngIf="((mainCourseAvail) && (img.category==='MainCourse')) || ((showCollenderInterface) && (img.category==='MainCourse'))">
+            <img [src]="img.url" height="100" width='250' *ngIf="(showItemsOnly && img.category==='MainCourse' ) || ((mainCourseAvail) && (img.category==='MainCourse')) || ((showCollenderInterface) && (img.category==='MainCourse'))">
             <h3 class="img_footer" *ngIf="img.category==='MainCourse'">
               {{img.title}}
               <label>Price: {{img.price}}</label>
@@ -104,7 +104,7 @@
             </h3>
 
           </div>
-          <div *ngIf="!(mainCourseAvail)">
+          <div *ngIf="(!mainCourseAvail)">
             Main Course not added yet
           </div>
         </div>
@@ -132,4 +132,44 @@
                    (clickButton)="clickButton($event.detail)"
                    [(eventsModel)]="events"
   ></ng-fullcalendar>
+</div>
+<hr/>
+<div *ngIf="itemsSelected">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Dates Between</th>
+      <th>Total Price for selected items</th>
+      <th>Selected Item List</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of eventPriceCal;let i = index">
+      <td>{{item.startDate}}-{{item.endDate}} {{i+1}}week</td>
+      <td>{{item.price}}</td>
+      <td class="link_item" (click)="itemToShow(item.selectedItem)"> <span>click here</span></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="selectedItemsToShow.length>0">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Selected date</th>
+      <th>Name of Item</th>
+      <th>Price</th>
+      <th>Category</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of selectedItemsToShow;let i = index">
+      <td>{{item.selectedDate}}</td>
+      <td>{{item.item.title}}</td>
+      <td>{{item.item.price}}</td>
+      <td>{{item.item.category}}</td>
+    </tr>
+    </tbody>
+  </table>
 </div>
