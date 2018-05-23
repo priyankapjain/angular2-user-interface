@@ -19,3 +19,14 @@
 :host /deep/.fc-day-grid-event .fc-time{
   visibility: hidden !important;
 }
+nav li{
+  padding-left:12px;
+  cursor: pointer;
+}
+.no_data{
+  text-align: center;
+}
+.admin_msg{
+  color:red;
+  text-align: center;
+}

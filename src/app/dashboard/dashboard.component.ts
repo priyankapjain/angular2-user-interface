@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   status: string = '';
   itemTypes: any = [];
   events: any[];
+  eventPriceCal:any=[];
 
   calendarOptions: Options;
   displayEvent: any;
@@ -31,6 +32,9 @@ export class DashboardComponent implements OnInit {
   private showItemsOnly: boolean = false;
   private showMainCourse: boolean = false;
   private showStarter: boolean = false;
+  private startsAvail: boolean = false;
+  private mainCourseAvail: boolean = false;
+  private adminMsg: string='';
 
   constructor(private cdr:ChangeDetectorRef,protected eventService: EventSesrvice, private router: Router, private fb: FormBuilder, private loginService: LoginService, private dashboardService: DashboardService, private appService: AppService) {
     this.createForm();
@@ -48,6 +52,15 @@ export class DashboardComponent implements OnInit {
       {type: 'MainCourse'}
     ];
     this.setCalendar();
+    for(let i=0;i<4;i+7){
+      this.eventPriceCal.push(
+        {
+          startDate:i+1,
+          price:0,
+          endDate:i+8
+        }
+      )
+    }
   }
 
   createForm() {
@@ -92,8 +105,9 @@ export class DashboardComponent implements OnInit {
       this.appService.images.push(this.currentObj);
       this.clearFile();
       this.form.reset();
-
+      this.checkMenusAvailability();
     }
+
   }
 
   clearFile() {
@@ -118,6 +132,8 @@ export class DashboardComponent implements OnInit {
   }
 
   eventClick(model: any) {
+    this.startsAvail = false;
+    this.mainCourseAvail = false;
     model = {
       event: {
         id: model.event.id,
@@ -166,15 +182,16 @@ export class DashboardComponent implements OnInit {
   itemSelected(item){
     console.log('Selected Item',item);
      let findIndexValue =  this.eventService.myData.findIndex(item=> (item.title === this.displayEvent.event.title)&&(item.id === this.displayEvent.event.id))
-     console.log("****",findIndexValue);
      if(findIndexValue!==-1){
-       this.eventService.myData[findIndexValue]['title'] = this.displayEvent.event.title+'Added successfully';
+       let menu = this.displayEvent.event.title.split(' ')[1];
+       this.eventService.myData[findIndexValue]['title'] =item.title+' '+ menu+' added successfully'+'-'+item.price+'';
        this.eventService.myData = [...this.eventService.myData];
        this.calendarOptions.events = this.eventService.myData;
        this.calendarOptions = {...this.calendarOptions};
-      // this.setCalendar();
-       this.cdr.detectChanges();
+       this.events = this.eventService.myData;
 
+       this.eventPriceCalculation(this.displayEvent,item);
+       this.cdr.detectChanges();
      }
   }
 
@@ -205,6 +222,43 @@ export class DashboardComponent implements OnInit {
       },
       events:this.eventService.myData
     };
+  }
+
+  checkMenusAvailability(){
+    this.startsAvail = false;
+    this.mainCourseAvail = false;
+   let imgList =  this.appService.images;
+   let count=0;
+  for(let i=0;i<imgList.length;i++){
+      if(imgList[i].category==='Starter'){
+        this.startsAvail = true;
+        count++;
+      }
+    if(imgList[i].category==='MainCourse'){
+      this.mainCourseAvail = true;
+      count++
+    }
+    if(count>=14){
+      this.adminMsg ='';
+    } else {
+      this.adminMsg ='Please add more than 7 images(starters & main course)';
+    }
+  }
+  }
+  eventPriceCalculation(event,item){
+    let obj={
+      startDate:'1',
+      price:null,
+      endDate:'8'
+    }
+    console.log('Event',event);
+    let date = ((event.event.start._i).split('-'))[2]
+    console.log('Item',item);
+    for(let j=0;j<4;j++){
+      if(date>= this.eventPriceCal[j].startDate && date <= this.eventPriceCal[j].endDate){
+        this.eventPriceCal[j] = this.eventPriceCal[j]+item.price;
+      }
+    }
   }
 
 }

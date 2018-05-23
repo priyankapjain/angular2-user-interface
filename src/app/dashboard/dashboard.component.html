@@ -3,24 +3,26 @@
     <div class="navbar-header">
       <!--<a class="navbar-brand" href="#">WebSiteName</a>-->
     </div>
-    <ul class="nav navbar-nav navbar-right">
+    <ul class="nav navbar-nav navbar-left">
       <!--<button (click)="calendarSelect()">Select Items</button>-->
+      <li class="active" (click)="showListItems()"><span class="glyphicon glyphicon-user"></span> Show Menu</li>
+      <li class="active" (click)="calendarSelect()"><span class="glyphicon glyphicon-calendar"></span> Choose Menu</li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li class="active" (click)="showListItems()"><span class="glyphicon glyphicon-user"></span> Welcome <span>{{loginService.username}}</span></li>
       <li class="active" (click)="logout()"><span class="glyphicon glyphicon-user"></span> Logout</li>
-      <li class="active" (click)="showListItems()"><span class="glyphicon glyphicon-user"></span> Show Item list</li>
-      <li class="active" (click)="calendarSelect()"><span class="glyphicon glyphicon-calendar"></span> Choose Item List</li>
     </ul>
   </div>
 </nav>
 
-
+<h3 class="admin_msg">{{adminMsg}}</h3>
 <div *ngIf="loginService.userRole==='admin'" class="admin_section col-lg-12">
-
-  <div class="panel panel-primary col-lg-6 admin_section_form">
+<div class="col-lg-offset-2 col-lg-6">
+  <div class="panel panel-primary admin_section_form">
     <div class="panel-heading">Add Items <h3>{{status}}</h3></div>
     <div class="panel-body">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="row">
-
           <div class="col-lg-12">
             <div class="form-group">
               <label for="name">Name</label>
@@ -40,22 +42,24 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="avatar">Avatar</label>
+              <label for="avatar">Upload Item</label>
               <input type="file" id="avatar" (change)="readUrl($event)" #fileInput>
               <button type="button" class="btn btn-sm btn-default" (click)="clearFile()">clear file</button>
 
               <img [src]="imgUrl" *ngIf="imgUrl" height="50" width='50'>
             </div>
           </div>
-          {{form.value|json}}
-          {{form.valid}}
           <button type="submit" [disabled]="form.invalid" class="btn btn-success">Submit <i
-            class="fa fa-spinner fa-spin fa-fw" *ngIf="loading"></i></button>
+            class="fa fa-spinner fa-spin fa-fw"></i></button>
 
         </div>
       </form>
     </div>
     <!--<div class="panel-footer">Panel Footer</div>-->
+  </div>
+</div>
+  <div class="col-lg-4">
+
   </div>
 </div>
 
@@ -67,17 +71,17 @@
       <div class="panel panel-default">
         <div class="panel-heading"> Images List - Starter</div>
         <div class="panel-body">
-          <div *ngFor="let img of appService.images;let i = index" class="img_list">
-            <img [src]="img.url" height="100" width='250' *ngIf="(img.category==='Starter');else no_starter ">
+          <div *ngFor="let img of appService.images;let i = index"  [ngClass]="{'img_list':(startsAvail) && (img.category==='Starter')}">
+            <img [src]="img.url" height="100" width='250' *ngIf="((startsAvail) && (img.category==='Starter')) || ((showCollenderInterface &&  img.category==='Starter'))">
             <h3 class="img_footer" *ngIf="img.category==='Starter'">
               {{img.title}}
               <label>Price: {{img.price}}</label>
               <span class="glyphicon glyphicon-trash" (click)="deleteImg(img.url)"></span>
               <input class="form-control" type="checkbox"  (change)="itemSelected(img)" />
             </h3>
-            <ng-template #no_starter>
-              Starters not added yet
-            </ng-template>
+          </div>
+          <div *ngIf="(!startsAvail)">
+            Starters not added yet
           </div>
         </div>
       </div>
@@ -90,16 +94,18 @@
       <div class="panel panel-default">
         <div class="panel-heading"> Images List - Main Course</div>
         <div class="panel-body">
-          <div *ngFor="let img of appService.images;let i = index" class="img_list">
-            <img [src]="img.url" height="100" width='250' *ngIf="(img.category==='MainCourse'); else nomain_course ">
+          <div *ngFor="let img of appService.images;let i = index"  [ngClass]="{'img_list':(startsAvail) && (img.category==='MainCourse')}">
+            <img [src]="img.url" height="100" width='250' *ngIf="((mainCourseAvail) && (img.category==='MainCourse')) || ((showCollenderInterface) && (img.category==='MainCourse'))">
             <h3 class="img_footer" *ngIf="img.category==='MainCourse'">
               {{img.title}}
               <label>Price: {{img.price}}</label>
               <span class="glyphicon glyphicon-trash" (click)="deleteImg(img.url)"></span>
+              <input class="form-control" type="checkbox"  (change)="itemSelected(img)" />
             </h3>
-            <ng-template #nomain_course>
-              Main Course not added yet
-            </ng-template>
+
+          </div>
+          <div *ngIf="!(mainCourseAvail)">
+            Main Course not added yet
           </div>
         </div>
       </div>
@@ -110,15 +116,20 @@
 
 
 <ng-template #noImages>
-  Admin not added images yet
+   <h3 class="no_data"> Admin not added any food  items</h3>
+  <hr/>
 </ng-template>
 
 <!--<p-schedule [events]="events"></p-schedule>-->
 <!--<angular2-fullcalendar [options]="calendarOptions"></angular2-fullcalendar>-->
 
 
-<p>Display event : {{displayEvent | json}}</p>
+<!--<p>Display event : {{displayEvent | json}}</p>-->
 <div *ngIf="calendarOptions && showCollenderInterface">
-  <ng-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="eventClick($event.detail)" (eventDrop)="updateEvent($event.detail)"
-                   (eventResize)="updateEvent($event.detail)" (clickButton)="clickButton($event.detail)"></ng-fullcalendar>
+  <ng-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="eventClick($event.detail)"
+                   (eventDrop)="updateEvent($event.detail)"
+                   (eventResize)="updateEvent($event.detail)"
+                   (clickButton)="clickButton($event.detail)"
+                   [(eventsModel)]="events"
+  ></ng-fullcalendar>
 </div>

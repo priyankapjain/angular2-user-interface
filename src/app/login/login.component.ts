@@ -19,8 +19,10 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
   }
   login(user){
+    this.loginService.username = user.username;
     if(user && user.username ==='Admin' && user.password ==='admin' ){
       this.loginService.userRole ='admin';
+
 
     } else {
       this.loginService.userRole = 'user';
