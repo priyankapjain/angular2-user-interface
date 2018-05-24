@@ -30,9 +30,10 @@ export class LoginComponent implements OnInit {
         this.invalidUser ='';
       },2000);
     }else {
+      this.loginService.userRole ='user';
       this.router.navigate(["dashboard"]);
     }
-   
+
 
   }
 
