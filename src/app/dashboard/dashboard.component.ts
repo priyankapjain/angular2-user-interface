@@ -8,12 +8,23 @@ import {CalendarComponent} from "ng-fullcalendar";
 import {Options} from "fullcalendar";
 import {EventSesrvice} from "./event.service";
 
+
+// Step 1: get jquery in your project
+//npm install jquery
+//Step 2: add type for jquery
+//npm install -D @types/jquery
+//Step 3: Use it in your component!
+//import * as $ from 'jquery';
+// Ready to use $!
+
+
 @Component({
   selector: 'dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  alreadySelectedMsg: string;
 
   form: FormGroup;
   loading: boolean = false;
@@ -44,6 +55,10 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+   this.initilizeData();
+  }
+
+  initilizeData(){
     if (!this.loginService.userRole || this.loginService.userRole === undefined) {
     }
     if(this.loginService.userRole ==='admin'){
@@ -69,9 +84,9 @@ export class DashboardComponent implements OnInit {
       this.showListItems();
       this.checkMenusAvailability();
     }
-   // Item list availability check
+    this.images = this.appService.images;
   }
-
+// FOrm create for upload food image data
   createForm() {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -98,6 +113,40 @@ export class DashboardComponent implements OnInit {
       }
       reader.readAsDataURL(event.target.files[0]);
     }
+  }
+
+  // setting calendar
+  setCalendar(){
+    const dateObj = new Date();
+    const yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1);
+    this.eventService.myData=[];
+    for(let i=1;i<31;i++){
+      if(i!==9 && i!==23 ){
+        this.eventService.myData.push({
+          id:i,
+          title: 'Add starter',
+          start: yearMonth + '-'+i,
+          checked:false
+        });
+        this.eventService.myData.push({
+          id:i,
+          title: 'Add Maincourse',
+          start: yearMonth + '-'+i,
+          checked:false
+        });
+      }
+    }
+
+    this.calendarOptions = {
+      editable: true,
+      eventLimit: false,
+      header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay,listMonth'
+      },
+      events:this.eventService.myData
+    };
   }
 
   onSubmit() { // form submit for image upload
@@ -144,6 +193,7 @@ export class DashboardComponent implements OnInit {
   eventClick(model: any) {
     this.startsAvail = false;
     this.mainCourseAvail = false;
+    this.checkMenusAvailability();
     model = {
       event: {
         id: model.event.id,
@@ -163,6 +213,14 @@ export class DashboardComponent implements OnInit {
       this.showStarter = true;
       this.showMainCourse = false;
     }
+    let findIndexValue =  this.eventService.myData.findIndex(item=> (item.title === this.displayEvent.event.title));
+    if(findIndexValue!==-1 &&  this.eventService.myData[findIndexValue].checked){
+      this.alreadySelectedMsg = 'Item already selected and Please select another item for another date';
+      setTimeout(()=>{
+       this.alreadySelectedMsg ='';
+      },2500);
+    }
+    
   }
 
   updateEvent(model: any) {
@@ -190,54 +248,46 @@ export class DashboardComponent implements OnInit {
     this.showItemsOnly = true;
     this.showCollenderInterface = false;
   }
-  itemSelected(item){
+
+  // item select 
+  itemSelected(item,index){
     console.log('Selected Item',item);
      let findIndexValue =  this.eventService.myData.findIndex(item=> (item.title === this.displayEvent.event.title)&&(item.id === this.displayEvent.event.id))
-     if(findIndexValue!==-1){
+     if(findIndexValue!==-1 &&  !this.eventService.myData[findIndexValue].checked){
        let menu = this.displayEvent.event.title.split(' ')[1];
        this.eventService.myData[findIndexValue]['title'] =item.title+' '+ menu+' added successfully'+'-'+item.price+'';
        this.eventService.myData = [...this.eventService.myData];
        this.calendarOptions.events = this.eventService.myData;
        this.calendarOptions = {...this.calendarOptions};
        this.events = this.eventService.myData;
-
       this.eventPriceCalculation(this.displayEvent,item);
+      this.eventService.myData[findIndexValue].checked = true;
        this.cdr.detectChanges();
+     } else {
+         this.alreadySelectedMsg = 'Select another item for another date';
+         setTimeout(()=>{
+          this.alreadySelectedMsg ='';
+         },2500);
      }
+     let starter = this.appService.images.filter(function(event){
+      return event.category == 'Starter'; 
+     });
+     let mainCourse = this.appService.images.filter(function(event){
+      return event.category == 'MainCourse'; 
+     });
+     if(item.category === 'Starter'){
+      this.appService.images[index].checked = !this.appService.images[index].checked;
+     } else if(item.category === 'MainCourse'){
+      this.appService.images[index].checked = !this.appService.images[index].checked;
+     }
+     this.appService.images.forEach((item,indexV,arr)=>{
+       if(index !== indexV && item.category === arr[indexV].category ){
+        arr[indexV].checked = false;
+       }
+     })
+     
   }
 
-  setCalendar(){
-    const dateObj = new Date();
-    const yearMonth = dateObj.getUTCFullYear() + '-' + (dateObj.getUTCMonth() + 1);
-    this.eventService.myData=[];
-    for(let i=1;i<31;i++){
-      this.eventService.myData.push({
-        id:i,
-        title: 'Add starter',
-        start: yearMonth + '-'+i,
-        validRange: {
-          start: '2018-05-01',
-          end: '2018-05-01'
-        }
-      });
-      this.eventService.myData.push({
-        id:i,
-        title: 'Add Maincourse',
-        start: yearMonth + '-'+i
-      });
-    }
-
-    this.calendarOptions = {
-      editable: true,
-      eventLimit: false,
-      header: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'month,agendaWeek,agendaDay,listMonth'
-      },
-      events:this.eventService.myData
-    };
-  }
 
   checkMenusAvailability(){
     this.startsAvail = false;
@@ -269,9 +319,12 @@ export class DashboardComponent implements OnInit {
       if(date>= this.eventPriceCal[j].startDate && date <= this.eventPriceCal[j].endDate){
         this.eventPriceCal[j].price = this.eventPriceCal[j].price+item.price;
         this.itemsSelected = true;
-        this.eventPriceCal[j]['selectedItem']=[];
-        this.eventPriceCal[j]['selectedItem'].push({'item':item,'selectedDate':event.event.start._i});
-        // this.eventPriceCal[j]['selectedDate']=event.event.start._i;
+        if(this.eventPriceCal[j] &&this.eventPriceCal[j].selectedItem ===undefined){
+          this.eventPriceCal[j]['selectedItem']=[];
+          this.eventPriceCal[j]['selectedItem'].push({'item':item,'selectedDate':event.event.start._i});
+        } else {
+          this.eventPriceCal[j]['selectedItem'].push({'item':item,'selectedDate':event.event.start._i});
+        }
       }
     }
   }

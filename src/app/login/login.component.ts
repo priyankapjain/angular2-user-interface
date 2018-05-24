@@ -24,15 +24,15 @@ export class LoginComponent implements OnInit {
     if(user && user.username ==='Admin' && user.password ==='MojoNetworks' ){
       this.loginService.userRole ='admin';
       this.router.navigate(["dashboard"]);
-    } else if(user && user.username ==='user' && user.password ==='user') {
-      this.loginService.userRole = 'user';
+    } else if(user && user.username ==='Admin'){
+      this.invalidUser = 'Please enter valid password Admin';
+      setTimeout(()=>{
+        this.invalidUser ='';
+      },2000);
+    }else {
       this.router.navigate(["dashboard"]);
-    } else {
-       this.invalidUser = 'Please enter valid credentials';
-       setTimeout(()=>{
-         this.invalidUser ='';
-       },2000);
     }
+   
 
   }
 

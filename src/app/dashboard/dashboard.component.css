@@ -25,6 +25,7 @@ nav li{
 }
 .no_data{
   text-align: center;
+  color:red;
 }
 .admin_msg{
   color:red;
@@ -35,5 +36,5 @@ nav li{
   text-decoration: underline;
 }
 .submit_btn{
-  margin-left: 12px;
+  margin-left: 12px !important;
 }

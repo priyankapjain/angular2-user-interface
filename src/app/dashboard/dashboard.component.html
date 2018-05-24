@@ -6,7 +6,7 @@
     <ul class="nav navbar-nav navbar-left">
       <!--<button (click)="calendarSelect()">Select Items</button>-->
       <li class="active" (click)="showListItems()"><span class="glyphicon glyphicon-user"></span> Show Menu</li>
-      <li class="active" (click)="calendarSelect()"><span class="glyphicon glyphicon-calendar"></span> Choose Menu</li>
+      <li class="active" (click)="calendarSelect()"><span class="glyphicon glyphicon-calendar"></span> Choose Calendar Menu</li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li class="active" (click)="showListItems()"><span class="glyphicon glyphicon-user"></span> Welcome <span>{{loginService.username}}</span></li>
@@ -14,7 +14,7 @@
     </ul>
   </div>
 </nav>
-
+<div>
 <h3 class="admin_msg">{{adminMsg}}</h3>
 <div *ngIf="loginService.userRole==='admin'" class="admin_section col-lg-12">
 <div class="col-lg-offset-2 col-lg-6">
@@ -49,7 +49,7 @@
               <img [src]="imgUrl" *ngIf="imgUrl" height="50" width='50'>
             </div>
           </div>
-          <button class="submit_btn" type="submit" [disabled]="form.invalid" class="btn btn-success">Submit <i
+          <button type="submit" [disabled]="form.invalid" class="btn btn-success submit_btn">Submit <i
             class="fa fa-spinner fa-spin fa-fw"></i></button>
 
         </div>
@@ -76,11 +76,11 @@
             <h3 class="img_footer" *ngIf="img.category==='Starter'">
               {{img.title}}
               <label>Price: {{img.price}}</label>
-              <span class="glyphicon glyphicon-trash" (click)="deleteImg(img.url)"></span>
-              <input class="form-control" type="checkbox"  (change)="itemSelected(img)" />
+              <span class="glyphicon glyphicon-trash" *ngIf="loginService.userRole==='admin'" (click)="deleteImg(img.url)"></span>
+              <input class="form-control"  *ngIf="showCollenderInterface" type="checkbox" [checked]="img.checked"   (change)="itemSelected(img,i)" />
             </h3>
           </div>
-          <div *ngIf="(!startsAvail)">
+          <div *ngIf="((!startsAvail))">
             Starters not added yet
           </div>
         </div>
@@ -99,8 +99,8 @@
             <h3 class="img_footer" *ngIf="img.category==='MainCourse'">
               {{img.title}}
               <label>Price: {{img.price}}</label>
-              <span class="glyphicon glyphicon-trash" (click)="deleteImg(img.url)"></span>
-              <input class="form-control" type="checkbox"  (change)="itemSelected(img)" />
+              <span class="glyphicon glyphicon-trash" *ngIf="loginService.userRole==='admin'"  (click)="deleteImg(img.url)"></span>
+              <input class="form-control" *ngIf="showCollenderInterface" type="checkbox" [checked]="img.checked" (change)="itemSelected(img,i)" />
             </h3>
 
           </div>
@@ -116,7 +116,9 @@
 
 
 <ng-template #noImages>
-   <h3 class="no_data"> Admin not added any food  items</h3>
+   <h3 class="no_data">
+     <span *ngIf="loginService.userRole==='user'"> Admin not added any food  items</span>
+    </h3>
   <hr/>
 </ng-template>
 
@@ -125,6 +127,7 @@
 
 
 <!--<p>Display event : {{displayEvent | json}}</p>-->
+<h3 class="no_data">{{alreadySelectedMsg}}</h3>
 <div *ngIf="calendarOptions && showCollenderInterface">
   <ng-fullcalendar #ucCalendar [options]="calendarOptions" (eventClick)="eventClick($event.detail)"
                    (eventDrop)="updateEvent($event.detail)"
@@ -172,4 +175,5 @@
     </tr>
     </tbody>
   </table>
+</div>
 </div>
